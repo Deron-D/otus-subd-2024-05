@@ -74,7 +74,6 @@
 
 Индексы:
 - CREATE INDEX idx_name ON suppliers(name);
-- CREATE INDEX idx_email ON suppliers(email);
 - CREATE INDEX idx_address ON suppliers(address);
 - CREATE INDEX idx_phone ON suppliers(phone);
 
@@ -90,7 +89,6 @@
 
 Индексы:
 - CREATE INDEX idx_name ON manufacturers(name);
-- CREATE INDEX idx_email ON manufacturers(email);
 - CREATE INDEX idx_address ON manufacturers(address);
 - CREATE INDEX idx_phone ON manufacturers(phone);
 
@@ -106,7 +104,6 @@
 
 Индексы:
 - CREATE INDEX idx_name ON customers(name);
-- CREATE INDEX idx_email ON customers(email);
 - CREATE INDEX idx_address ON customers(address);
 - CREATE INDEX idx_phone ON customers(phone);
 
