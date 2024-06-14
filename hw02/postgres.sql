@@ -27,7 +27,7 @@ CREATE INDEX idx_name ON categories(name);
 CREATE TABLE prices (
   id INT PRIMARY KEY,
   product_id INT NOT NULL,
-  price DECIMAL(10, 2) NOT NULL,
+  price numeric CONSTRAINT positive_price CHECK (price > 0),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   FOREIGN KEY (product_id) REFERENCES products(id)
