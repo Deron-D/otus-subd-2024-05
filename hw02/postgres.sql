@@ -11,6 +11,11 @@ CREATE TABLE products (
 );
 
 CREATE INDEX idx_name ON products(name);
+CREATE INDEX idx_name_category_id ON products(name,category_id);
+CREATE INDEX idx_name_supplier_id ON products(name,supplier_id);
+CREATE INDEX idx_name_manufacturer_id ON products(name,manufacturer_id);
+CREATE INDEX idx_name_supplier_id_manufacturer_id ON products(name,supplier_id,manufacturer_id);
+CREATE INDEX idx_name_supplier_id_category_id ON products(name,supplier_id,category_id);
 
 CREATE TABLE categories (
   id INT PRIMARY KEY,
@@ -28,6 +33,7 @@ CREATE TABLE prices (
   FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE INDEX idx_product_id_start_date_end_date ON prices(product_id,start_date,end_date)
 CREATE INDEX idx_price ON prices(price);
 CREATE INDEX idx_start_date ON prices(start_date);
 CREATE INDEX idx_end_date ON prices(end_date);
@@ -80,4 +86,14 @@ CREATE TABLE purchases (
   FOREIGN KEY (price_id) REFERENCES prices(id)
 );
 
+CREATE INDEX idx_customer_id ON purchases(customer_id);
+CREATE INDEX idx_product_id ON purchases(product_id);
+CREATE INDEX idx_price_id ON purchases(price_id);
 CREATE INDEX idx_quantity ON purchases(quantity);
+CREATE INDEX idx_purchase_date ON purchases(purchase_date);
+CREATE INDEX idx_customer_id_quantity ON purchases(customer_id,quantity);
+CREATE INDEX idx_product_id_quantity ON purchases(product_id,quantity);
+CREATE INDEX idx_customer_id_quantity_purchase_date ON purchases(customer_id,quantity,purchase_date);
+CREATE INDEX idx_product_id_quantity_purchase_date ON purchases(product_id,quantity,purchase_date);
+CREATE INDEX idx_customer_id_quantity_price_id ON purchases(customer_id,quantity,price_id);
+CREATE INDEX idx_product_id_quantity_price_id ON purchases(product_id,quantity,price_id);

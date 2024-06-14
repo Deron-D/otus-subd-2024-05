@@ -27,21 +27,29 @@
 ### 1. Анализ таблицы `Продукты` (products)
 Возможные запросы/ограничения:
 
-| Поле              | Описание запроса      | Кардинальность | Ограничения                       |
-|-------------------|-----------------------|----------------|-----------------------------------|
-| `name`            | Поиск по наименованию | Высокая        | Максимум 255 символов, `NOT NULL` |
-| `category_id`     | -                     | -              | INT, `NOT NULL`                   |
-| `supplier_id`     | -                     | -              | INT, `NOT NULL`                   |
-| `manufacturer_id` | -                     | -              | INT, `NOT NULL`                   |
+| Поле              | Описание запроса               | Кардинальность | Ограничения                       |
+|-------------------|--------------------------------|----------------|-----------------------------------|
+| `id`              | Поиск по id продукта           | Средняя        | PRIMARY KEY (UNIQUE NOT NULL)     |
+| `name`            | Поиск по наименованию продукта | Высокая        | Максимум 255 символов, `NOT NULL` |
+| `category_id`     | Поиск товара по категории      | Средняя        | INT, `NOT NULL`                   |
+| `supplier_id`     | Поиск товара по постащику      | Высокая        | INT, `NOT NULL`                   |
+| `manufacturer_id` | Поиск товара по производителю  | Высокая        | INT, `NOT NULL`                   |
 
 Индексы:
 - CREATE INDEX idx_name ON products(name);
+- CREATE INDEX idx_name_category_id ON products(name,category_id);
+- CREATE INDEX idx_name_supplier_id ON products(name,supplier_id);
+- CREATE INDEX idx_name_manufacturer_id ON products(name,manufacturer_id);
+- CREATE INDEX idx_name_supplier_id_manufacturer_id ON products(name,supplier_id,manufacturer_id);
+- CREATE INDEX idx_name_supplier_id_category_id ON products(name,supplier_id,category_id);
+
 
 ### 2. Анализ таблицы `Категории продуктов` (categories)
 Возможные запросы/ограничения:
 
 | Поле   | Описание запроса                          | Кардинальность | Ограничения                       |
 |--------|-------------------------------------------|----------------|-----------------------------------|
+| `id`   | Поиск по id категории продуктов           | Средняя        | PRIMARY KEY (UNIQUE NOT NULL)     |
 | `name` | Поиск по наименованию категории продуктов | Средняя        | Максимум 255 символов, `NOT NULL` |
 
 Индексы:
@@ -50,23 +58,27 @@
 ### 3. Анализ таблицы `Цены` (prices)
 Возможные запросы/ограничения:
 
-| Поле         | Описание запроса                                | Кардинальность | Ограничения                |
-|--------------|-------------------------------------------------|----------------|----------------------------|
-| `product_id` | -                                               | -              | INT, `NOT NULL`            |
-| `price`      | Поиск по цене/диапазону цен                     | Высокая        | DECIMAL(10, 2), `NOT NULL` |
-| `start_date` | Поиск по дате начала (периоду) действия цены    | Высокая        | DATE, `NOT NULL`           |
-| `end_date`   | Поиск по дате окончания (периоду) действия цены | Высокая        | DATE, `NOT NULL`           |
+| Поле         | Описание запроса                                | Кардинальность | Ограничения                    |
+|--------------|-------------------------------------------------|----------------|--------------------------------|
+| `id`         | Поиск по id цен                                 | Высокая        | PRIMARY KEY (UNIQUE NOT NULL)  |
+| `product_id` | Запрос истории цен по продукту                  | Высокая        | INT, `NOT NULL`                |
+| `price`      | Поиск по цене/диапазону цен                     | Высокая        | DECIMAL(10, 2), `NOT NULL`     |
+| `start_date` | Поиск по дате начала (периоду) действия цены    | Высокая        | DATE, `NOT NULL`               |
+| `end_date`   | Поиск по дате окончания (периоду) действия цены | Высокая        | DATE, `NOT NULL`               |
 
 Индексы:
+- CREATE INDEX idx_product_id_start_date_end_date ON prices(product_id,start_date,end_date)
 - CREATE INDEX idx_price ON prices(price);
 - CREATE INDEX idx_start_date ON prices(start_date);
 - CREATE INDEX idx_end_date ON prices(end_date);
+
 
 ### 4. Анализ таблицы `Поставщики` (suppliers)
 Возможные запросы/ограничения:
 
 | Поле      | Описание запроса                    | Кардинальность | Ограничения                       |
 |-----------|-------------------------------------|----------------|-----------------------------------|
+| `id`      | Поиск по id поставщика              | Высокая        | PRIMARY KEY (UNIQUE NOT NULL)     |
 | `name`    | Поиск поставщика по наименованию    | Высокая        | Максимум 255 символов, `NOT NULL` |
 | `email`   | Поиск поставщика по адресу эл.почты | Высокая        | Максимум 32 символов, `UNIQUE`    |
 | `address` | Поиск поставщика по адресу          | Высокая        | Максимум 255 символов             |
@@ -82,6 +94,7 @@
 
 | Поле      | Описание запроса                    | Кардинальность | Ограничения                       |
 |-----------|-------------------------------------|----------------|-----------------------------------|
+| `id`      | Поиск по id производителя           | Высокая        | PRIMARY KEY (UNIQUE NOT NULL)     |
 | `name`    | Поиск поставщика по наименованию    | Высокая        | Максимум 255 символов, `NOT NULL` |
 | `email`   | Поиск поставщика по адресу эл.почты | Высокая        | Максимум 32 символов, `UNIQUE`    |
 | `address` | Поиск поставщика по адресу          | Высокая        | Максимум 255 символов             |
@@ -95,12 +108,13 @@
 ### 6. Анализ таблицы `Покупатели` (customers)
 Возможные запросы/ограничения:
 
-| Поле      | Описание запроса                    | Кардинальность | Ограничения                       |
-|-----------|-------------------------------------|----------------|-----------------------------------|
-| `name`    | Поиск поставщика по наименованию    | Высокая        | Максимум 255 символов, `NOT NULL` |
-| `email`   | Поиск поставщика по адресу эл.почты | Высокая        | Максимум 32 символов, `UNIQUE`    |
-| `address` | Поиск поставщика по адресу          | Высокая        | Максимум 255 символов             |
-| `phone`   | Поиск поставщика по номеру телефона | Высокая        | Максимум 20 символов              |
+| Поле      | Описание запроса                    | Кардинальность | Ограничения                        |
+|-----------|-------------------------------------|----------------|------------------------------------|
+| `id`      | Поиск по id покупателя              | Высокая        | PRIMARY KEY (UNIQUE NOT NULL)      |
+| `name`    | Поиск поставщика по наименованию    | Высокая        | Максимум 255 символов, `NOT NULL`  |
+| `email`   | Поиск поставщика по адресу эл.почты | Высокая        | Максимум 32 символов, `UNIQUE`     |
+| `address` | Поиск поставщика по адресу          | Высокая        | Максимум 255 символов              |
+| `phone`   | Поиск поставщика по номеру телефона | Высокая        | Максимум 20 символов               |
 
 Индексы:
 - CREATE INDEX idx_name ON customers(name);
@@ -110,9 +124,24 @@
 ### 7. Анализ таблицы `Покупки` (purchases)
 Возможные запросы/ограничения:
 
-| Поле       | Описание запроса                      | Кардинальность | Ограничения     |
-|------------|---------------------------------------|----------------|-----------------|
-| `quantity` | Поиск по количеству проданного товара | Высокая        | INT, `NOT NULL` |
+| Поле            | Описание запроса                      | Кардинальность | Ограничения                   |
+|-----------------|---------------------------------------|----------------|-------------------------------|
+| `id`            | Поиск по id покупки                   | Высокая        | PRIMARY KEY (UNIQUE NOT NULL) |
+| `customer_id`   | Поиск покупок по поставщику           | Высокая        | INT, `NOT NULL`               |
+| `product_id`    | Поиск покупок по товару               | Высокая        | INT, `NOT NULL`               |
+| `price_id`      | Поиск покупок по диапазону цен        | Высокая        | INT, `NOT NULL`               |
+| `quantity`      | Поиск по количеству проданного товара | Высокая        | INT, `NOT NULL`               |
+| `purchase_date` | Поиск по дате покупки                 | Высокая        | DATE, `NOT NULL`              |
 
 Индексы:
+- CREATE INDEX idx_customer_id ON purchases(customer_id);
+- CREATE INDEX idx_product_id ON purchases(product_id);
+- CREATE INDEX idx_price_id ON purchases(price_id);
 - CREATE INDEX idx_quantity ON purchases(quantity);
+- CREATE INDEX idx_purchase_date ON purchases(purchase_date);
+- CREATE INDEX idx_customer_id_quantity ON purchases(customer_id,quantity);
+- CREATE INDEX idx_product_id_quantity ON purchases(product_id,quantity);
+- CREATE INDEX idx_customer_id_quantity_purchase_date ON purchases(customer_id,quantity,purchase_date);
+- CREATE INDEX idx_product_id_quantity_purchase_date ON purchases(product_id,quantity,purchase_date);
+- CREATE INDEX idx_customer_id_quantity_price_id ON purchases(customer_id,quantity,price_id);
+- CREATE INDEX idx_product_id_quantity_price_id ON purchases(product_id,quantity,price_id);
