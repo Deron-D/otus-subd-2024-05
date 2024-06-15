@@ -29,7 +29,7 @@
 
 | Поле              | Описание запроса               | Кардинальность | Ограничения                       |
 |-------------------|--------------------------------|----------------|-----------------------------------|
-| `id`              | Поиск по id продукта           | Средняя        | PRIMARY KEY (UNIQUE NOT NULL)     |
+| `id`              | Поиск по id продукта           | Высокая        | PRIMARY KEY (UNIQUE NOT NULL)     |
 | `name`            | Поиск по наименованию продукта | Высокая        | Максимум 255 символов, `NOT NULL` |
 | `category_id`     | Поиск товара по категории      | Средняя        | INT, `NOT NULL`                   |
 | `supplier_id`     | Поиск товара по постащику      | Высокая        | INT, `NOT NULL`                   |
@@ -37,11 +37,12 @@
 
 Индексы:
 - CREATE INDEX idx_name ON products(name);
-- CREATE INDEX idx_name_category_id ON products(name,category_id);
-- CREATE INDEX idx_name_supplier_id ON products(name,supplier_id);
-- CREATE INDEX idx_name_manufacturer_id ON products(name,manufacturer_id);
-- CREATE INDEX idx_name_supplier_id_manufacturer_id ON products(name,supplier_id,manufacturer_id);
-- CREATE INDEX idx_name_supplier_id_category_id ON products(name,supplier_id,category_id);
+- CREATE INDEX idx_category_id_name ON products(category_id,name);
+- CREATE INDEX idx_supplier_id_name ON products(supplier_id,name);
+- CREATE INDEX idx_manufacturer_id_name ON products(manufacturer_id,name);
+- CREATE INDEX idx_supplier_id_manufacturer_id_category_id ON products(supplier_id,manufacturer_id,category_id);
+- CREATE INDEX idx_supplier_id_manufacturer_id_name ON products(supplier_id,manufacturer_id,name);
+- CREATE INDEX idx_supplier_id_category_id_name ON products(supplier_id,category_id,name);
 
 
 ### 2. Анализ таблицы `Категории продуктов` (categories)
@@ -134,14 +135,7 @@
 | `purchase_date` | Поиск по дате покупки                 | Высокая        | DATE, `NOT NULL`              |
 
 Индексы:
-- CREATE INDEX idx_customer_id ON purchases(customer_id);
+- CREATE INDEX idx_customer_id_purchase_date ON purchases(customer_id,purchase_date,product_id);
 - CREATE INDEX idx_product_id ON purchases(product_id);
 - CREATE INDEX idx_price_id ON purchases(price_id);
-- CREATE INDEX idx_quantity ON purchases(quantity);
 - CREATE INDEX idx_purchase_date ON purchases(purchase_date);
-- CREATE INDEX idx_customer_id_quantity ON purchases(customer_id,quantity);
-- CREATE INDEX idx_product_id_quantity ON purchases(product_id,quantity);
-- CREATE INDEX idx_customer_id_quantity_purchase_date ON purchases(customer_id,quantity,purchase_date);
-- CREATE INDEX idx_product_id_quantity_purchase_date ON purchases(product_id,quantity,purchase_date);
-- CREATE INDEX idx_customer_id_quantity_price_id ON purchases(customer_id,quantity,price_id);
-- CREATE INDEX idx_product_id_quantity_price_id ON purchases(product_id,quantity,price_id);
