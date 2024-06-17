@@ -1,0 +1,77 @@
+- name:  Configure host master
+  hosts: master
+  become: yes
+  gather_facts: false
+  vars:
+    epel: epel-release
+    postgres_repo: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    postgres_pkgs:
+      - postgresql15-server
+      - python-psycopg2
+      - unzip
+    postgresql_server: postgresql-15
+    postgresql_bin_path: /usr/pgsql-15/bin/postgresql-15-setup
+    postgresql_data_dir: /var/lib/pgsql/15/data
+    otus_superuser_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      66386539323539343761613437393130343464653935363232303433636238633839663063363062
+      6662343461393430646330363262633264633961636366330a643266353461666134616438346537
+      35346534363565646164353234663833366161366238316434666330303433613865363632643765
+      6134373037373562620a633730636636343833613765343039326139313630636332373165373537
+      3364
+
+  tasks:
+    - name: Install EPEL Repo package
+      yum:
+        name: "{{ epel }}"
+        state: present
+
+    - name: Install postgres repo
+      yum:
+        name: "{{ postgres_repo }}"
+        state: present
+
+    - name: Install postgres pkgs
+      yum:
+        name: "{{ postgres_pkgs }}"
+        state: present
+
+    - name: PostgreSQL database init
+      command: "{{ postgresql_bin_path }} initdb"
+      args:
+        creates: "{{ postgresql_data_dir }}/PG_VERSION"
+
+    - name: Start postgres service
+      systemd:
+        name: "{{ postgresql_server }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Set listen address for postgresql
+      ansible.builtin.lineinfile:
+        path: "{{ postgresql_data_dir }}/postgresql.conf"
+        regexp: "^#listen_addresses = 'localhost'"
+        line: listen_addresses = '*'
+
+    - name: Modify pga_hba.conf
+      ansible.builtin.lineinfile:
+        path: "{{ postgresql_data_dir }}/pg_hba.conf"
+        regexp: '^host\s+all\s+all\s+127\.0\.0\.1\/32\s+scram-sha-256$'
+        line: 'host    all             all             0.0.0.0/0            md5'
+
+    - name: Restart postgres service
+      systemd:
+        name: "{{ postgresql_server }}"
+        state: restarted
+
+    - name: Create database users
+      postgresql_user:
+        db: postgres
+        name: "{{ item.name }}"
+        password: "{{ item.password }}"
+        role_attr_flags: "{{ item.flags }}"
+      become: yes
+      become_user: postgres
+      with_items:
+        - { name: otus_superuser, password: "{{ otus_superuser_password }}", flags: SUPERUSER}
