@@ -5,7 +5,7 @@ ENV["LC_ALL"] = "en_US.UTF-8"
 
 MACHINES = {
   :master => {
-        :box_name => "centos/7",
+        :box_name => "ubuntu/jammy64",
         :ip_addr => '192.168.56.150',
         # VM CPU count
         :cpus => 2,
