@@ -25,5 +25,5 @@ DDL скрипты для postgres
 
 ## **Выполнено:**
 
-
+DDL скрипт для postgres - [shop.sql](./shop.sql)
 

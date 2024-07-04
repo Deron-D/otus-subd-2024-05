@@ -30,7 +30,6 @@
             update_cache: yes
             cache_valid_time: 86400 #One day
 
-
         - name: Install pkgs
           apt:
             name: "{{ pkgs }}"
@@ -68,16 +67,39 @@
             name: "{{ postgresql_server }}"
             state: restarted
 
-    - name: Create database users
-      community.postgresql.postgresql_user:
-        db: postgres
-        name: "{{ item.name }}"
-        password: "{{ item.password }}"
-        role_attr_flags: "{{ item.flags }}"
+        - name: Create a directory if it does not exist
+          ansible.builtin.file:
+            path: /var/shop/
+            state: directory
+            owner: postgres
+            group: postgres
+            mode: '0644'
+
+    - name: DB tasks
       become: yes
       become_user: postgres
-      no_log: true
-      with_items:
-        - { name: otus_superuser, password: "{{ otus_superuser_password }}", flags: SUPERUSER}
-      tags:
-        - create_database_users
+      block:
+        - name: Create database users
+          community.postgresql.postgresql_user:
+            db: postgres
+            name: "{{ item.name }}"
+            password: "{{ item.password }}"
+            role_attr_flags: "{{ item.flags }}"
+          no_log: true
+          with_items:
+            - { name: otus_superuser, password: "{{ otus_superuser_password }}", flags: SUPERUSER}
+          tags:
+            - create_database_users
+
+        - name: Remove demo database if exists
+          community.postgresql.postgresql_db:
+            name: otus
+            state: absent
+
+        - name: Get demo database
+          ansible.builtin.copy:
+            src: "/home/dpp/Документы/Otus/otus-subd-2024-05/hw04/shop.sql"
+            dest: /var/tmp
+
+        - name: Load demo database
+          shell: psql -f /var/tmp/shop.sql
