@@ -69,11 +69,14 @@
 
         - name: Create a directory if it does not exist
           ansible.builtin.file:
-            path: /var/shop/
+            path: "{{ item }}"
             state: directory
             owner: postgres
             group: postgres
             mode: '0644'
+          loop:
+            - '/var/shop/'
+            - '/var/fastspace/'
 
     - name: DB tasks
       become: yes

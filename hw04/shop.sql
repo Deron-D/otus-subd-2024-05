@@ -1,28 +1,34 @@
 -- создание базы данных
-CREATE DATABASE otus;
+CREATE DATABASE shop;
 
-\connect otus
+\connect shop
 
 -- создание схем
+-- логическое разделение на склад и собственно магазин
 CREATE SCHEMA shop;
+CREATE SCHEMA stock;
 
-CREATE TABLESPACE fastspace LOCATION '/var/shop/';
-SET default_tablespace = fastspace;
+-- создание табличных пространств
+-- обычное: для справочников
+-- быстрое: для индексов и транзакционных таблиц
+CREATE TABLESPACE shoptablespace LOCATION '/var/shop/';
+CREATE TABLESPACE fastspace LOCATION '/var/fastspace/';
+SET default_tablespace = shoptablespace;
 
 -- Создание пользователя user и reader
 CREATE USER "user" WITH ENCRYPTED PASSWORD 'password';
 CREATE USER "reader" WITH ENCRYPTED PASSWORD 'password';
 
 -- Назначению пользователю user всех привилегий
-GRANT ALL PRIVILEGES ON DATABASE otus TO "user";
+GRANT ALL PRIVILEGES ON DATABASE shop TO "user";
 
 -- Создание роли только для чтения
 CREATE ROLE readonly;
-GRANT CONNECT ON DATABASE otus TO readonly;
+GRANT CONNECT ON DATABASE shop TO readonly;
 GRANT USAGE ON SCHEMA shop TO readonly;
+GRANT USAGE ON SCHEMA stock TO readonly;
 
-
-CREATE TABLE shop.products (
+CREATE TABLE stock.products (
   id INT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description TEXT,
@@ -31,20 +37,20 @@ CREATE TABLE shop.products (
   manufacturer_id INT NOT NULL
 );
 
-CREATE INDEX idx_products_name ON shop.products(name);
-CREATE INDEX idx_products_category_id_name ON shop.products(category_id,name);
-CREATE INDEX idx_products_supplier_id_name ON shop.products(supplier_id,name);
-CREATE INDEX idx_products_manufacturer_id_name ON shop.products(manufacturer_id,name);
-CREATE INDEX idx_products_supplier_id_manufacturer_id_category_id ON shop.products(supplier_id,manufacturer_id,category_id);
-CREATE INDEX idx_products_supplier_id_manufacturer_id_name ON shop.products(supplier_id,manufacturer_id,name);
-CREATE INDEX idx_products_supplier_id_category_id_name ON shop.products(supplier_id,category_id,name);
+CREATE INDEX idx_products_name ON stock.products(name) TABLESPACE fastspace;
+CREATE INDEX idx_products_category_id_name ON stock.products(category_id,name) TABLESPACE fastspace;
+CREATE INDEX idx_products_supplier_id_name ON stock.products(supplier_id,name) TABLESPACE fastspace;
+CREATE INDEX idx_products_manufacturer_id_name ON stock.products(manufacturer_id,name) TABLESPACE fastspace;
+CREATE INDEX idx_products_supplier_id_manufacturer_id_category_id ON stock.products(supplier_id,manufacturer_id,category_id) TABLESPACE fastspace;
+CREATE INDEX idx_products_supplier_id_manufacturer_id_name ON stock.products(supplier_id,manufacturer_id,name) TABLESPACE fastspace;
+CREATE INDEX idx_products_supplier_id_category_id_name ON stock.products(supplier_id,category_id,name) TABLESPACE fastspace;
 
-CREATE TABLE shop.categories (
+CREATE TABLE stock.categories (
   id INT PRIMARY KEY,
   name VARCHAR(255) NOT NULL
 );
 
-CREATE INDEX idx_categories_name ON shop.categories(name);
+CREATE INDEX idx_categories_name ON shop.categories(name) TABLESPACE fastspace;
 
 CREATE TABLE shop.prices (
   id INT PRIMARY KEY,
@@ -54,12 +60,12 @@ CREATE TABLE shop.prices (
   end_date DATE NOT NULL
 );
 
-CREATE INDEX idx_prices_product_id_start_date_end_date ON shop.prices(product_id,start_date,end_date);
-CREATE INDEX idx_prices_price ON shop.prices(price);
-CREATE INDEX idx_prices_start_date ON shop.prices(start_date);
-CREATE INDEX idx_prices_end_date ON shop.prices(end_date);
+CREATE INDEX idx_prices_product_id_start_date_end_date ON shop.prices(product_id,start_date,end_date) TABLESPACE fastspace;
+CREATE INDEX idx_prices_price ON shop.prices(price) TABLESPACE fastspace;
+CREATE INDEX idx_prices_start_date ON shop.prices(start_date) TABLESPACE fastspace;
+CREATE INDEX idx_prices_end_date ON shop.prices(end_date) TABLESPACE fastspace;
 
-CREATE TABLE shop.suppliers (
+CREATE TABLE stock.suppliers (
   id INT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
@@ -67,11 +73,11 @@ CREATE TABLE shop.suppliers (
   phone VARCHAR(20)
 );
 
-CREATE INDEX idx_suppliers_name ON shop.suppliers(name);
-CREATE INDEX idx_suppliers_address ON shop.suppliers(address);
-CREATE INDEX idx_suppliers_phone ON shop.suppliers(phone);
+CREATE INDEX idx_suppliers_name ON stock.suppliers(name) TABLESPACE fastspace;
+CREATE INDEX idx_suppliers_address ON stock.suppliers(address) TABLESPACE fastspace;
+CREATE INDEX idx_suppliers_phone ON stock.suppliers(phone) TABLESPACE fastspace;
 
-CREATE TABLE shop.manufacturers (
+CREATE TABLE stock.manufacturers (
   id INT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
@@ -79,11 +85,11 @@ CREATE TABLE shop.manufacturers (
   phone VARCHAR(20)
 );
 
-CREATE INDEX idx_manufacturers_name ON shop.manufacturers(name);
-CREATE INDEX idx_manufacturers_address ON shop.manufacturers(address);
-CREATE INDEX idx_manufacturers_phone ON shop.manufacturers(phone);
+CREATE INDEX idx_manufacturers_name ON stock.manufacturers(name) TABLESPACE fastspace;
+CREATE INDEX idx_manufacturers_address ON stock.manufacturers(address) TABLESPACE fastspace;
+CREATE INDEX idx_manufacturers_phone ON stock.manufacturers(phone) TABLESPACE fastspace;
 
-CREATE TABLE shop.customers (
+CREATE TABLE stock.customers (
   id INT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
@@ -91,9 +97,9 @@ CREATE TABLE shop.customers (
   phone VARCHAR(20)
 );
 
-CREATE INDEX idx_customers_name ON shop.customers(name);
-CREATE INDEX idx_customers_address ON shop.customers(address);
-CREATE INDEX idx_customers_phone ON shop.customers(phone);
+CREATE INDEX idx_customers_name ON stock.customers(name) TABLESPACE fastspace;
+CREATE INDEX idx_customers_address ON stock.customers(address) TABLESPACE fastspace;
+CREATE INDEX idx_customers_phone ON stock.customers(phone) TABLESPACE fastspace;
 
 CREATE TABLE shop.purchases (
   id INT PRIMARY KEY,
@@ -102,20 +108,20 @@ CREATE TABLE shop.purchases (
   price_id INT NOT NULL,
   quantity INT NOT NULL,
   purchase_date DATE NOT NULL
-);
+) TABLESPACE fastspace;
 
-CREATE INDEX idx_purchases_customer_id_purchase_date ON shop.purchases(customer_id,purchase_date,product_id);
-CREATE INDEX idx_purchases_product_id ON shop.purchases(product_id);
-CREATE INDEX idx_purchases_price_id ON shop.purchases(price_id);
-CREATE INDEX idx_purchases_purchase_date ON shop.purchases(purchase_date);
+CREATE INDEX idx_purchases_customer_id_purchase_date ON shop.purchases(customer_id,purchase_date,product_id) TABLESPACE fastspace;
+CREATE INDEX idx_purchases_product_id ON shop.purchases(product_id) TABLESPACE fastspace;
+CREATE INDEX idx_purchases_price_id ON shop.purchases(price_id) TABLESPACE fastspace;
+CREATE INDEX idx_purchases_purchase_date ON shop.purchases(purchase_date) TABLESPACE fastspace;
 
-ALTER TABLE shop.products ADD CONSTRAINT productscategory_fk0 FOREIGN KEY (category_id) REFERENCES shop.categories(id);
-ALTER TABLE shop.products ADD CONSTRAINT productssupplier_fk0 FOREIGN KEY (supplier_id) REFERENCES shop.suppliers(id);
-ALTER TABLE shop.products ADD CONSTRAINT productsmanufacturer_fk0 FOREIGN KEY (manufacturer_id) REFERENCES shop.manufacturers(id);
+ALTER TABLE stock.products ADD CONSTRAINT productscategory_fk0 FOREIGN KEY (category_id) REFERENCES stock.categories(id);
+ALTER TABLE stock.products ADD CONSTRAINT productssupplier_fk0 FOREIGN KEY (supplier_id) REFERENCES stock.suppliers(id);
+ALTER TABLE stock.products ADD CONSTRAINT productsmanufacturer_fk0 FOREIGN KEY (manufacturer_id) REFERENCES stock.manufacturers(id);
 
-ALTER TABLE shop.prices ADD CONSTRAINT pricesproduct_fk0 FOREIGN KEY (product_id) REFERENCES shop.products(id);
+ALTER TABLE shop.prices ADD CONSTRAINT pricesproduct_fk0 FOREIGN KEY (product_id) REFERENCES stock.products(id);
 
-ALTER TABLE shop.purchases ADD CONSTRAINT purchasescustomer_fk0 FOREIGN KEY (customer_id) REFERENCES shop.customers(id);
-ALTER TABLE shop.purchases ADD CONSTRAINT purchasesproduct_fk0 FOREIGN KEY (product_id) REFERENCES shop.products(id);
+ALTER TABLE shop.purchases ADD CONSTRAINT purchasescustomer_fk0 FOREIGN KEY (customer_id) REFERENCES stock.customers(id);
+ALTER TABLE shop.purchases ADD CONSTRAINT purchasesproduct_fk0 FOREIGN KEY (product_id) REFERENCES stock.products(id);
 ALTER TABLE shop.purchases ADD CONSTRAINT purchasesshopprice_fk0 FOREIGN KEY (price_id) REFERENCES shop.prices(id);
 

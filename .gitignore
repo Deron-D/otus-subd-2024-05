@@ -35,3 +35,4 @@ terraform.rc
 
 .idea
 /hw03/.vagrant/
+/wip/
