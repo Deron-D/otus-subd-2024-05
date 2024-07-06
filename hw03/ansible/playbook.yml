@@ -24,11 +24,11 @@
     - name: Install postgesql
       become: true
       block:
-        - name: Update apt packages
-          become: yes
-          apt:
-            update_cache: yes
-            cache_valid_time: 86400 #One day
+#        - name: Update apt packages
+#          become: yes
+#          apt:
+#            update_cache: yes
+#            cache_valid_time: 86400 #One day
 
         - name: Install pkgs
           apt:

@@ -27,3 +27,16 @@ DDL скрипты для postgres
 
 DDL скрипт для postgres - [shop.sql](./shop.sql)
 
+Проверяем размещение табличного пространства для БД shop:
+~~~roomsql
+SELECT oid, datname, pg_tablespace_location(dattablespace) AS tablespace_location
+FROM pg_database
+WHERE datname = current_database();
+~~~
+
+~~~console
+  oid  | datname | tablespace_location 
+-------+---------+---------------------
+ 16510 | shop    | /var/shop
+(1 row)
+~~~

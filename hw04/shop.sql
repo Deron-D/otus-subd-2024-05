@@ -1,5 +1,11 @@
+-- создание табличных пространств
+-- обычное: для справочников
+-- быстрое: для индексов и транзакционных таблиц
+CREATE TABLESPACE shoptablespace LOCATION '/var/shop/';
+CREATE TABLESPACE fastspace LOCATION '/var/fastspace/';
+
 -- создание базы данных
-CREATE DATABASE shop;
+CREATE DATABASE shop TABLESPACE=shoptablespace;
 
 \connect shop
 
@@ -7,13 +13,6 @@ CREATE DATABASE shop;
 -- логическое разделение на склад и собственно магазин
 CREATE SCHEMA shop;
 CREATE SCHEMA stock;
-
--- создание табличных пространств
--- обычное: для справочников
--- быстрое: для индексов и транзакционных таблиц
-CREATE TABLESPACE shoptablespace LOCATION '/var/shop/';
-CREATE TABLESPACE fastspace LOCATION '/var/fastspace/';
-SET default_tablespace = shoptablespace;
 
 -- Создание пользователя user и reader
 CREATE USER "user" WITH ENCRYPTED PASSWORD 'password';
@@ -50,7 +49,7 @@ CREATE TABLE stock.categories (
   name VARCHAR(255) NOT NULL
 );
 
-CREATE INDEX idx_categories_name ON shop.categories(name) TABLESPACE fastspace;
+CREATE INDEX idx_categories_name ON stock.categories(name) TABLESPACE fastspace;
 
 CREATE TABLE shop.prices (
   id INT PRIMARY KEY,
