@@ -1,17 +1,17 @@
 - name:  Configure host master
   hosts: master
-  become: yes
   gather_facts: false
   vars:
-    epel: epel-release
-    postgres_repo: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    postgres_pkgs:
-      - postgresql15-server
-      - python-psycopg2
+    pkgs:
+      - curl
+      - ca-certificates
+      - postgresql-common
       - unzip
-    postgresql_server: postgresql-15
-    postgresql_bin_path: /usr/pgsql-15/bin/postgresql-15-setup
-    postgresql_data_dir: /var/lib/pgsql/15/data
+    postgres_pkgs:
+      - postgresql-15
+      - python3-psycopg2
+    postgresql_server:  postgresql@15-main.service
+    postgresql_conf_dir: /etc/postgresql/15/main/
     otus_superuser_password: !vault |
       $ANSIBLE_VAULT;1.1;AES256
       66386539323539343761613437393130343464653935363232303433636238633839663063363062
@@ -21,57 +21,88 @@
       3364
 
   tasks:
-    - name: Install EPEL Repo package
-      yum:
-        name: "{{ epel }}"
-        state: present
+    - name: Install postgesql
+      become: true
+      block:
+#        - name: Update apt packages
+#          become: yes
+#          apt:
+#            update_cache: yes
+#            cache_valid_time: 86400 #One day
 
-    - name: Install postgres repo
-      yum:
-        name: "{{ postgres_repo }}"
-        state: present
+        - name: Install pkgs
+          apt:
+            name: "{{ pkgs }}"
+            state: present
 
-    - name: Install postgres pkgs
-      yum:
-        name: "{{ postgres_pkgs }}"
-        state: present
+        - name: Automated repository configuration
+          shell: echo "\n" | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 
-    - name: PostgreSQL database init
-      command: "{{ postgresql_bin_path }} initdb"
-      args:
-        creates: "{{ postgresql_data_dir }}/PG_VERSION"
+        - name: Install postgres pkgs
+          apt:
+            name: "{{ postgres_pkgs }}"
+            state: present
 
-    - name: Start postgres service
-      systemd:
-        name: "{{ postgresql_server }}"
-        state: started
-        enabled: yes
-        daemon_reload: yes
+        - name: Start postgres service
+          systemd:
+            name: "{{ postgresql_server }}"
+            state: started
+            enabled: yes
+            daemon_reload: yes
 
-    - name: Set listen address for postgresql
-      ansible.builtin.lineinfile:
-        path: "{{ postgresql_data_dir }}/postgresql.conf"
-        regexp: "^#listen_addresses = 'localhost'"
-        line: listen_addresses = '*'
+        - name: Set listen address for postgresql
+          ansible.builtin.lineinfile:
+            path: "{{ postgresql_conf_dir }}/postgresql.conf"
+            regexp: "^#listen_addresses = 'localhost'"
+            line: listen_addresses = '*'
 
-    - name: Modify pga_hba.conf
-      ansible.builtin.lineinfile:
-        path: "{{ postgresql_data_dir }}/pg_hba.conf"
-        regexp: '^host\s+all\s+all\s+127\.0\.0\.1\/32\s+scram-sha-256$'
-        line: 'host    all             all             0.0.0.0/0            md5'
+        - name: Modify pga_hba.conf
+          ansible.builtin.lineinfile:
+            path: "{{ postgresql_conf_dir }}/pg_hba.conf"
+            regexp: '^host\s+all\s+all\s+127\.0\.0\.1\/32\s+scram-sha-256$'
+            line: 'host    all             all             0.0.0.0/0            trust'
 
-    - name: Restart postgres service
-      systemd:
-        name: "{{ postgresql_server }}"
-        state: restarted
+        - name: Restart postgres service
+          systemd:
+            name: "{{ postgresql_server }}"
+            state: restarted
 
-    - name: Create database users
-      postgresql_user:
-        db: postgres
-        name: "{{ item.name }}"
-        password: "{{ item.password }}"
-        role_attr_flags: "{{ item.flags }}"
+        - name: Create a directory if it does not exist
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+            owner: postgres
+            group: postgres
+            mode: '0644'
+          loop:
+            - '/var/shop/'
+            - '/var/fastspace/'
+
+    - name: DB tasks
       become: yes
       become_user: postgres
-      with_items:
-        - { name: otus_superuser, password: "{{ otus_superuser_password }}", flags: SUPERUSER}
+      block:
+        - name: Create database users
+          community.postgresql.postgresql_user:
+            db: postgres
+            name: "{{ item.name }}"
+            password: "{{ item.password }}"
+            role_attr_flags: "{{ item.flags }}"
+          no_log: true
+          with_items:
+            - { name: otus_superuser, password: "{{ otus_superuser_password }}", flags: SUPERUSER}
+          tags:
+            - create_database_users
+
+        - name: Remove demo database if exists
+          community.postgresql.postgresql_db:
+            name: otus
+            state: absent
+
+        - name: Get demo database
+          ansible.builtin.copy:
+            src: "/home/dpp/Документы/Otus/otus-subd-2024-05/hw04/shop.sql"
+            dest: /var/tmp
+
+        - name: Load demo database
+          shell: psql -f /var/tmp/shop.sql
