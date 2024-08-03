@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  change-vol-ownership:
+    image: ubuntu
+    user: "root"
+    volumes:
+      - shop:/var/shop/
+      - fastspace:/var/fastspace/
+    command: sh -c "chown -R 70:70 /var/shop && chown -R 70:70 /var/fastspace"
+
+  postgres:
+    image: postgres:16.3-alpine
+    restart: always
+    ports:
+        - 5432:5432
+    depends_on:
+      change-vol-ownership:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_PASSWORD: changeit
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes: 
+        - ./data/:/var/lib/postgresql/data/
+        - shop:/var/shop/
+        - fastspace:/var/fastspace/
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  shop:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/shop/
+  fastspace:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/fastspace/

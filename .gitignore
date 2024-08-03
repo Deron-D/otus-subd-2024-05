@@ -36,3 +36,5 @@ terraform.rc
 .idea
 /hw03/.vagrant/
 /wip/
+/hw03/pgdata/
+*.log
