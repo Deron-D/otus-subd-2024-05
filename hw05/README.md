@@ -31,3 +31,61 @@ DML в PostgreSQL
 
 ## **Выполнено:**
 
+1. Напишите запрос по своей базе с регулярным выражением, добавьте пояснение, что вы хотите найти.
+   
+~~~sql
+-- Выбрать все продукты у которых наименование поставщика начинается на `Поставщик`  
+SELECT * FROM products p
+WHERE p.supplier_id IN
+    (SELECT s.id FROM suppliers s WHERE s.name ILIKE 'Поставщик%');
+~~~
+
+2. Напишите запрос по своей базе с использованием LEFT JOIN и INNER JOIN, как порядок соединений в FROM влияет на результат? Почему?
+ 
+~~~sql
+--  LEFT JOIN: если в таблице manufacturers нет производителя, продукт все равно будет выведен с NULL в "Наименование производителя"
+SELECT
+p.name as "Наименование товара",
+m.name as "Наименование производителя"
+FROM products p
+LEFT JOIN manufacturers m ON p.manufacturer_id = m.id;
+
+--  INNER JOIN будут выведены только те продукты, у которых производитель не NULL
+SELECT
+p.name as "Наименование товара",
+m.name as "Наименование производителя"
+FROM products p
+INNER JOIN manufacturers m ON p.manufacturer_id = m.id;
+~~~
+
+3. Напишите запрос на добавление данных с выводом информации о добавленных строках.
+
+~~~sql
+INSERT INTO products (id,name,description,category_id,supplier_id,manufacturer_id)
+VALUES (7,'диван',NULL,1,1,NULL),(8,'кровать',NULL,1,1,NULL),(9,'шкаф',NULL,1,1,NULL)
+RETURNING *;
+~~~
+
+4. Напишите запрос с обновлением данные используя UPDATE FROM.
+
+~~~sql
+UPDATE products AS ps
+SET description = 'Производитель ' || ps.name || ' - ' || m.name
+FROM products p JOIN manufacturers m ON p.manufacturer_id = m.id 
+WHERE p.description is NULL;
+~~~
+
+5. Напишите запрос для удаления данных с оператором DELETE используя join с другой таблицей с помощью using.
+
+~~~sql
+DELETE FROM purchases pu
+USING prices p
+WHERE p.product_id = pu.product_id AND p.price IS NULL;
+~~~
+
+**Задание со ⭐️:**
+Приведите пример использования утилиты COPY
+
+~~~
+COPY products TO '/tmp/products.copy';
+~~~

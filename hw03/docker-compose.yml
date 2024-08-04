@@ -20,10 +20,11 @@ services:
     environment:
       POSTGRES_PASSWORD: changeit
       PGDATA: /var/lib/postgresql/data/pgdata
-    volumes: 
+    volumes:
         - ./data/:/var/lib/postgresql/data/
         - shop:/var/shop/
         - fastspace:/var/fastspace/
+        - ./shop.sql:/tmp/shop.sql
 
   adminer:
     image: adminer
