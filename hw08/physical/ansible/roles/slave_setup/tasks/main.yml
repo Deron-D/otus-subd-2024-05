@@ -1,0 +1,34 @@
+---
+# tasks file for roles/slave_setup
+- name: Remove current database
+  become: yes
+  become_user: postgres
+  file:
+    path: "{{ postgresql_data_dir }}"
+    state: absent
+
+- name: Run pg_basebackup
+  become_user: postgres
+  become: yes
+  shell: "/usr/bin/pg_basebackup --pgdata {{ postgresql_data_dir }} --write-recovery-conf --wal-method=stream --host={{ master_ip }} --user={{ replica_username }} --slot={{ physical_replication_slot }}"
+
+- name: Copy config files on slave
+  become: true
+  become_user: postgres
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: postgres
+    group: postgres
+    mode: 0600
+  with_items:
+    - { src: 'templates/slave.conf.j2', dest: '{{ postgresql_conf_dir }}/conf.d/slave.conf'}
+
+- name: Restart_PostgreSQL
+  become: yes
+  systemd:
+    name: "{{ postgresql_service }}"
+    state: restarted
+    enabled: yes
+
+

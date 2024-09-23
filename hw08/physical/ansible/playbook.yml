@@ -1,0 +1,23 @@
+- name: Install postgres on hosts
+  hosts: all
+  gather_facts: false
+  vars_files:
+    - ./roles/vars/all.yml
+  roles:
+    - pg_install
+
+- name: Configure master
+  hosts: master
+  gather_facts: false
+  vars_files:
+    - ./roles/vars/all.yml
+  roles:
+    - master_setup
+
+- name: Configure slave
+  hosts: slave
+  gather_facts: false
+  vars_files:
+    - ./roles/vars/all.yml
+  roles:
+    - slave_setup
