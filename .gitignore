@@ -34,7 +34,7 @@ override.tf.json
 terraform.rc
 
 .idea
-/hw03/.vagrant/
-/wip/
-/hw03/pgdata/
+.vagrant
+wip
+pgdata
 *.log

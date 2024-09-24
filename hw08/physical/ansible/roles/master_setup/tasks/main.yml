@@ -1,0 +1,38 @@
+---
+# tasks file for roles/master_setup
+- name: Copy config files on master
+  become: true
+  become_user: postgres
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: postgres
+    group: postgres
+    mode: 0600
+  with_items:
+    - { src: 'templates/pg_hba.conf.j2', dest: '{{ postgresql_conf_dir }}/pg_hba.conf'}
+    - { src: 'templates/master.conf.j2', dest: '{{ postgresql_conf_dir }}/conf.d/master.conf'}
+
+- name: Create physical slot for replication if doesn't exist
+  become: true
+  become_user: postgres
+  postgresql_slot:
+    slot_name: "{{ physical_replication_slot }}"
+
+- name: Create database users
+  postgresql_user:
+    db: postgres
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    role_attr_flags: "{{ item.flags }}"
+  become: yes
+  become_user: postgres
+  with_items:
+    - { name: "{{ replica_username }}", password: "{{ replica_password }}", flags: REPLICATION,LOGIN}
+
+- name: Restart_PostgreSQL
+  become: yes
+  systemd:
+    name: "{{ postgresql_service }}"
+    state: restarted
+    enabled: yes

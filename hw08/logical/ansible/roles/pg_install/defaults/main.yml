@@ -1,0 +1,10 @@
+---
+# defaults file for roles/pg_install
+pkgs:
+  - curl
+  - ca-certificates
+  - postgresql-common
+  - unzip
+postgres_pkgs:
+  - postgresql-15
+  - python3-psycopg2

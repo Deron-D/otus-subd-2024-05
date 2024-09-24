@@ -1,0 +1,42 @@
+---
+# tasks file for roles/pg_install
+- name: Install postgesql
+  become: true
+  block:
+    - name: Install pkgs
+      apt:
+        name: "{{ pkgs }}"
+        state: present
+
+    - name: Automated repository configuration
+      shell: echo "\n" | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+
+    - name: Install postgres pkgs
+      apt:
+        name: "{{ postgres_pkgs }}"
+        state: present
+
+    - name: Start postgres service
+      systemd:
+        name: "{{ postgresql_service }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Set listen address for postgresql
+      ansible.builtin.lineinfile:
+        path: "{{ postgresql_conf_dir }}/postgresql.conf"
+        regexp: "^#listen_addresses = 'localhost'"
+        line: listen_addresses = '*'
+
+    - name: Modify pga_hba.conf
+      ansible.builtin.lineinfile:
+        path: "{{ postgresql_conf_dir }}/pg_hba.conf"
+        regexp: '^host\s+all\s+all\s+127\.0\.0\.1\/32\s+scram-sha-256$'
+        line: 'host    all             all             0.0.0.0/0            trust'
+
+    - name: Restart postgres service
+      systemd:
+        name: "{{ postgresql_service }}"
+        state: restarted
+
