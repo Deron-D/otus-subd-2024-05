@@ -2,73 +2,57 @@ CREATE database otus;
 USE otus;
 
 CREATE TABLE IF NOT EXISTS products (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
-  description TEXT,
-  category_id INT UNSIGNED NOT NULL,
-  supplier_id INT UNSIGNED NOT NULL,
-  manufacturer_id INT UNSIGNED NOT NULL,
-  CONSTRAINT Products_pk PRIMARY KEY (id)
+  description VARCHAR(1000) NOT NULL,
+  category_id INT UNSIGNED NOT NULL REFERENCES category (category_id),
+  supplier_id INT UNSIGNED NOT NULL REFERENCES supplier (supplier_id),
+  manufacturer_id INT UNSIGNED NOT NULL REFERENCES manufacturer (manufacturer_id),
+  tags JSON DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS categories (
-  category_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  CONSTRAINT Categories_pk PRIMARY KEY (category_id)
+  category_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS prices (
-  price_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  product_id INT UNSIGNED NOT NULL,
+  price_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  product_id INT UNSIGNED NOT NULL REFERENCES product (product_id),
   price numeric,
   start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
-  CONSTRAINT Prices_pk PRIMARY KEY (price_id)
+  end_date DATE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS suppliers (
-  supplier_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  supplier_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
   address VARCHAR(255),
-  phone VARCHAR(20),
-  CONSTRAINT Suppliers_pk PRIMARY KEY (supplier_id)
+  phone VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS manufacturers (
-  manufacturer_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  manufacturer_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
   address VARCHAR(255),
-  phone VARCHAR(20),
-  CONSTRAINT manufacturers_pk PRIMARY KEY (manufacturer_id)
+  phone VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS customers (
-  customer_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  customer_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(32) UNIQUE,
   address VARCHAR(255),
-  phone VARCHAR(20),
-  CONSTRAINT Customers_pk PRIMARY KEY (customer_id)
+  phone VARCHAR(20)
 );
 
 CREATE TABLE purchases (
-  purchase_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  customer_id INT UNSIGNED NOT NULL,
-  product_id INT UNSIGNED NOT NULL,
-  price_id INT UNSIGNED NOT NULL,
+  purchase_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  customer_id INT UNSIGNED NOT NULL REFERENCES customer (customer_id),
+  product_id INT UNSIGNED NOT NULL REFERENCES product (product_id),
+  price_id INT UNSIGNED NOT NULL REFERENCES price (price_id),
   quantity INT NOT NULL,
-  purchase_date DATE NOT NULL,
-  CONSTRAINT Purchases_pk PRIMARY KEY (purchase_id)
+  purchase_date DATE NOT NULL
 );
-
-ALTER TABLE products ADD CONSTRAINT productscategory_fk0 FOREIGN KEY (category_id) REFERENCES categories(category_id);
-ALTER TABLE products ADD CONSTRAINT productssupplier_fk0 FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id);
-ALTER TABLE products ADD CONSTRAINT productsmanufacturer_fk0 FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(manufacturer_id);
-
-ALTER TABLE prices ADD CONSTRAINT pricesproduct_fk0 FOREIGN KEY (product_id) REFERENCES products(id);
-
-ALTER TABLE purchases ADD CONSTRAINT purchasescustomer_fk0 FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
-ALTER TABLE purchases ADD CONSTRAINT purchasesproduct_fk0 FOREIGN KEY (product_id) REFERENCES products(id);
-ALTER TABLE purchases ADD CONSTRAINT purchasesshopprice_fk0 FOREIGN KEY (price_id) REFERENCES prices(price_id);
