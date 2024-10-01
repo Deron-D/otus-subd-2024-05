@@ -4,12 +4,14 @@ USE otus;
 CREATE TABLE IF NOT EXISTS products (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
-  description VARCHAR(1000) NOT NULL,
-  category_id INT UNSIGNED NOT NULL REFERENCES category (category_id),
-  supplier_id INT UNSIGNED NOT NULL REFERENCES supplier (supplier_id),
-  manufacturer_id INT UNSIGNED NOT NULL REFERENCES manufacturer (manufacturer_id),
-  tags JSON DEFAULT NULL
+--  description VARCHAR(1000) NOT NULL,
+--  category_id INT UNSIGNED NOT NULL REFERENCES category (category_id),
+--  supplier_id INT UNSIGNED NOT NULL REFERENCES supplier (supplier_id),
+--  manufacturer_id INT UNSIGNED NOT NULL REFERENCES manufacturer (manufacturer_id),
+  specifications JSON DEFAULT NULL
 );
+
+
 
 CREATE TABLE IF NOT EXISTS categories (
   category_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,

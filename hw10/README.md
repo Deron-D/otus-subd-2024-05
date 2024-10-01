@@ -23,3 +23,28 @@
 
 ## **Выполнено:**
 
+1. Добавил UNSIGNED NOT NULL UNIQUE к первичным ключам. Заменил создание связей между таблицами с конструкции
+`ALTER TABLE ...` на `REFERENCES` в самих таблицах.
+
+2. Добавлен в таблицу `products` тип JSON. 
+
+```sql
+CREATE TABLE IF NOT EXISTS products (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+--  description VARCHAR(1000) NOT NULL,
+--  category_id INT UNSIGNED NOT NULL REFERENCES category (category_id),
+--  supplier_id INT UNSIGNED NOT NULL REFERENCES supplier (supplier_id),
+--  manufacturer_id INT UNSIGNED NOT NULL REFERENCES manufacturer (manufacturer_id),
+  specifications JSON DEFAULT NULL
+);
+```
+Заносим значения
+```
+INSERT INTO products(name, specifications) VALUES ('Water', '{"type": "Drinks", "Volume": 1500}');
+```
+
+Теперь можем искать с помощью `JSON_EXTRACT`
+```
+SELECT * FROM products WHERE JSON_EXTRACT(specifications, '$.type') = 'Drinks';
+```
