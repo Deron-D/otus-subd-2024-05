@@ -1,0 +1,60 @@
+CREATE database otus;
+USE otus;
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+--  description VARCHAR(1000) NOT NULL,
+--  category_id INT UNSIGNED NOT NULL REFERENCES category (category_id),
+--  supplier_id INT UNSIGNED NOT NULL REFERENCES supplier (supplier_id),
+--  manufacturer_id INT UNSIGNED NOT NULL REFERENCES manufacturer (manufacturer_id),
+  specifications JSON DEFAULT NULL
+);
+
+
+
+CREATE TABLE IF NOT EXISTS categories (
+  category_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS prices (
+  price_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  product_id INT UNSIGNED NOT NULL REFERENCES product (product_id),
+  price numeric,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS suppliers (
+  supplier_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(32) UNIQUE,
+  address VARCHAR(255),
+  phone VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS manufacturers (
+  manufacturer_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(32) UNIQUE,
+  address VARCHAR(255),
+  phone VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+  customer_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(32) UNIQUE,
+  address VARCHAR(255),
+  phone VARCHAR(20)
+);
+
+CREATE TABLE purchases (
+  purchase_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  customer_id INT UNSIGNED NOT NULL REFERENCES customer (customer_id),
+  product_id INT UNSIGNED NOT NULL REFERENCES product (product_id),
+  price_id INT UNSIGNED NOT NULL REFERENCES price (price_id),
+  quantity INT NOT NULL,
+  purchase_date DATE NOT NULL
+);
