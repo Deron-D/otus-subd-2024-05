@@ -20,6 +20,17 @@ CREATE TABLE IF NOT EXISTS manufacturers (
 --  phone VARCHAR(20)
 );
 
+
+CREATE TABLE IF NOT EXISTS prices (
+  price_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+  product_id INT UNSIGNED,
+  price numeric,
+  start_date DATE,
+  end_date DATE
+--  CONSTRAINT Prices_pk PRIMARY KEY (price_id)
+);
+
+
 INSERT INTO manufacturers
     (manufacturer_id, name)
 VALUES
@@ -35,11 +46,17 @@ INSERT INTO products
     (id, name, manufacturer_id)
 VALUES
     (default, 'Сок яблочный', 1),
+    (default, 'Сок томатный', 1),
     (default, 'Йогурт', 1),
-    (default, 'Печенье', 2),
-    (default, 'Шоколад', 2),
-    (default, 'Сервелат', 3),
+    (default, 'Печенье', 3),
+    (default, 'Шоколад', 3),
+    (default, 'Сервелат', 7),
     (default, 'Вода минеральная', NULL),
     (default, 'Свинина', NULL);
 
+INSERT INTO prices
+    (price_id, product_id, price, start_date, end_date)
+VALUES
+    (default, '1', '45', '2024-09-01', '2024-09-30'),
+    (default, '2', '55', '2024-09-01', '2024-09-30');
 
