@@ -21,3 +21,28 @@ SQL выборка
 
 ## **Выполнено:**
 
+1. Напишите запрос по своей базе с inner join
+~~~sql
+--  INNER JOIN будут выведены только те продукты, у которых производитель не NULL
+USE otus;
+SELECT
+  p.name as "Наименование товара",
+  m.name as "Производитель"
+FROM products p
+INNER JOIN manufacturers m ON p.manufacturer_id = m.manufacturer_id;
+~~~
+
+![img.png](img.png)
+
+2. Напишите запрос по своей базе с left join
+~~~sql
+--  LEFT JOIN: если в таблице manufacturers нет производителя, продукт все равно будет выведен с NULL в "Наименование производителя"
+USE otus;
+SELECT
+  p.name as "Наименование товара",
+  m.name as "Производитель"
+FROM products p
+LEFT JOIN manufacturers m ON p.manufacturer_id = m.manufacturer_id;
+~~~
+
+![img_1.png](img_1.png)

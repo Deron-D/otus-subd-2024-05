@@ -1,6 +1,18 @@
 version: '3.1'
 
 services:
+
+  adminer:
+    image: adminer
+    depends_on:
+      otusdb:
+        condition: service_started
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=otusdb
+    ports:
+      - 8080:8080
+
   otusdb:
     image: mysql:8.0.15
     environment:

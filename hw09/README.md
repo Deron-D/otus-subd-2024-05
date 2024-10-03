@@ -41,7 +41,13 @@ manifest-for-linux-arm64-v8
 ~~~bash
 cd ./otus-mysql-docker
 docker-compose up -d
-docker-compose exec otusdb mysql -u root -p12345 otus
+docker-compose exec otusdb mysql
+~~~
+
+~~~sql
+CREATE USER 'root'@'%' IDENTIFIED BY '12345';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+FLUSH PRIVILEGES;
 ~~~
 
 проверяем
