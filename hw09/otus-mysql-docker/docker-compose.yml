@@ -23,6 +23,7 @@ services:
       - data:/var/lib/mysql
       - ./init.sql:/init.sql
       - ./custom.conf:/etc/mysql/conf.d
+      - /home/dpp/Документы/Otus/otus-subd-2024-05/hw12/users-39289-9e5604.csv:/home/root/users-39289-9e5604.csv
     expose:
       - "3306"
     ports:
