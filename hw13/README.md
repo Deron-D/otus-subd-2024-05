@@ -73,7 +73,8 @@ SELECT * FROM products;
 
 ```
 SELECT
-    category,
+    IF(GROUPING(category), 'ИТОГО', category)
+        AS category,
     MAX(price) AS max_price,
     MIN(price) AS min_price,
     COUNT(category) as сount_category
@@ -82,7 +83,7 @@ FROM
 GROUP BY 
     category WITH ROLLUP;
 ```
-![img.png](img.png)
+![img_3.png](img_3.png)
 
 #### 2. Сделать выборку, показывающую самый дорогой и самый дешевый товар в каждой категории
 
