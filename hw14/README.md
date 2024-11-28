@@ -176,15 +176,15 @@ ADD FULLTEXT INDEX ft_description (Description);
 
 - Запускаем с EXPLAIN
 ~~~
-explain SELECT      pm.Name AS ModelName,     pd.Description AS ModelDescription,     c.Name AS CultureName FROM productmodel pm JOIN productmodelproductdescriptionculture pmpdc      ON pm.ProductModelID = pmpdc.ProductModelID JOIN productdescription pd      ON pmpdc.ProductDescriptionID = pd.ProductDescriptionID JOIN culture c      ON pmpdc.CultureID = c.CultureID WHERE c.CultureID = 'en'   AND MATCH(pm.Name) AGAINST('Mountain Bottle Cage' IN NATURAL LANGUAGE MODE);
-+----+-------------+-------+------------+----------+---------------------------+----------+---------+-------------------------------------------+------+----------+-------------------------------+
-| id | select_type | table | partitions | type     | possible_keys             | key      | key_len | ref                                       | rows | filtered | Extra                         |
-+----+-------------+-------+------------+----------+---------------------------+----------+---------+-------------------------------------------+------+----------+-------------------------------+
-|  1 | SIMPLE      | c     | NULL       | const    | PRIMARY                   | PRIMARY  | 20      | const                                     |    1 |   100.00 | NULL                          |
-|  1 | SIMPLE      | pm    | NULL       | fulltext | PRIMARY,ft_name           | ft_name  | 0       | const                                     |    1 |   100.00 | Using where; Ft_hints: sorted |
-|  1 | SIMPLE      | pmpdc | NULL       | ref      | PRIMARY,my_fk_33,my_fk_34 | my_fk_34 | 24      | const,adventureworks.pm.ProductModelID    |    1 |   100.00 | Using where; Using index      |
-|  1 | SIMPLE      | pd    | NULL       | eq_ref   | PRIMARY                   | PRIMARY  | 4       | adventureworks.pmpdc.ProductDescriptionID |    1 |   100.00 | NULL                          |
-+----+-------------+-------+------------+----------+---------------------------+----------+---------+-------------------------------------------+------+----------+-------------------------------+
+ EXPLAIN SELECT      pm.Name AS ModelName,     pd.Description AS ModelDescription,     c.Name AS CultureName FROM productmodel pm JOIN productmodelproductdescriptionculture pmpdc      ON pm.ProductModelID = pmpdc.ProductModelID JOIN productdescription pd      ON pmpdc.ProductDescriptionID = pd.ProductDescriptionID JOIN culture c      ON pmpdc.CultureID = c.CultureID WHERE c.CultureID = 'en'   AND (       MATCH(pm.Name) AGAINST('Mountain Bottle Cage' IN NATURAL LANGUAGE MODE)       OR MATCH(pd.Description) AGAINST('Washes off' IN NATURAL LANGUAGE MODE)   );
++----+-------------+-------+------------+--------+---------------------------+----------+---------+-------------------------------------------+------+----------+--------------------------+
+| id | select_type | table | partitions | type   | possible_keys             | key      | key_len | ref                                       | rows | filtered | Extra                    |
++----+-------------+-------+------------+--------+---------------------------+----------+---------+-------------------------------------------+------+----------+--------------------------+
+|  1 | SIMPLE      | c     | NULL       | const  | PRIMARY                   | PRIMARY  | 20      | const                                     |    1 |   100.00 | NULL                     |
+|  1 | SIMPLE      | pm    | NULL       | ALL    | PRIMARY                   | NULL     | NULL    | NULL                                      |  128 |   100.00 | NULL                     |
+|  1 | SIMPLE      | pmpdc | NULL       | ref    | PRIMARY,my_fk_33,my_fk_34 | my_fk_34 | 24      | const,adventureworks.pm.ProductModelID    |    1 |   100.00 | Using where; Using index |
+|  1 | SIMPLE      | pd    | NULL       | eq_ref | PRIMARY                   | PRIMARY  | 4       | adventureworks.pmpdc.ProductDescriptionID |    1 |   100.00 | Using where              |
++----+-------------+-------+------------+--------+---------------------------+----------+---------+-------------------------------------------+------+----------+--------------------------+
 4 rows in set, 1 warning (0.00 sec)
 ~~~
 
