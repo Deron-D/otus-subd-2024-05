@@ -38,3 +38,4 @@ terraform.rc
 wip
 pgdata
 *.log
+/hw14/AdventureWorks-MySQL-with-FKs.sql
