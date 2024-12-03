@@ -1,10 +1,9 @@
 # **Проектная работа**
-> _Разработка проекта_
+> _Сравнение операторов PostgreSQL для Kubernetes_
 
 ## Содержание проекта
-Сравнение операторов PostgreSQL для Kubernetes
 
-## Постановка задачи
+### Постановка задачи
 Некоторое время назад у нас в проекте возникла задача по развертыванию обновленной версии нашего
 платформенного решения на нескольких окружениях (разработка/демонстрация).
 В используемых нами инструментальных решениях (Gitlab, Harbor) в качестве РСУБД применяется Postgres. 
@@ -12,16 +11,16 @@
 не изобретать велосипед, мы решили рассмотреть известные операторы, позволяющие разворачивать базы данных 
 PostgreSQL в Kubernetes и управлять ими.
 
-## Рассматриваемые решения
+### Рассматриваемые решения
 
-### Crunchy Data PostgreSQL Operator
-### Stolon
-### Zalando Postgres Operator
-### KubeDB
-### StackGres
-### Сloudnative-pg
+- #### Zalando Postgres Operator
+- #### Сloudnative-pg
+- #### KubeDB
+- #### StackGres
+- #### Crunchy Data PostgreSQL Operator
+- #### Stolon
 
-## Функциональные возможности
+### Функциональные возможности
 
 - Метод установки оператора
 - Метод установки инстанса PSQL
@@ -40,13 +39,20 @@ PostgreSQL в Kubernetes и управлять ими.
 
 ### Производительность
 
-Подумать, как мерить???
+https://github.com/akopytov/sysbench
+
+https://postgrespro.ru/docs/postgrespro/16/pgbench
+
+https://github.com/prometheus-community/postgres_exporter
+
+![img.png](img.png)
 
 ### Масштабируемость
-## Услуги поддержки
-## Вопросы миграции
-## Выводы
+### Услуги поддержки
+### Вопросы миграции
+### Выводы
 
+### Статьи:
 Сравнение MySQL и PostgreSQL в 2023 году
 https://habr.com/ru/companies/otus/articles/722304/
 
