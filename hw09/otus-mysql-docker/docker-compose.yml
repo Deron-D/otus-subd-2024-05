@@ -14,7 +14,7 @@ services:
       - 8080:8080
 
   otusdb:
-    image: mysql:8.0.15
+    image: mysql:8.0.18
     environment:
       - MYSQL_ROOT_PASSWORD=12345
     command: 
