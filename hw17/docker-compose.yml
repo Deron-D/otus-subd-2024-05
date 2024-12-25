@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  percona-mysql:
+    image: percona/percona-server:8.4
+    container_name: percona-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "12345"
+      MYSQL_DATABASE: "world"
+      MYSQL_USER: "testuser"
+      MYSQL_PASSWORD: 'testpassword'
+    ports:
+      - "3306:3306"
+    volumes:
+      - percona_data:/var/lib/mysql
+      - ./custom.conf:/etc/mysql/conf.d
+      - shared_tmp:/tmp
+      - ./world_db-195395-1b86c6.sql:/tmp/world_db.sql
+    networks:
+      - percona_network
+
+  xtrabackup:
+    image: percona/percona-xtrabackup
+    container_name: percona-xtrabackup
+    depends_on:
+      - percona-mysql
+    command: |
+      bash -c "
+      while ! mysqladmin ping -hpercona-mysql --silent; do
+          sleep 1;
+      done;
+      xbstream -x < /backup_des.xbstream;"
+    volumes:
+      - xtrabackup_data:/backups
+      - shared_tmp:/tmp
+      - ./backup_des.xbstream:/backup_des.xbstream
+    networks:
+      - percona_network
+
+volumes:
+  percona_data:
+  xtrabackup_data:
+  shared_tmp:
+
+networks:
+  percona_network:
+
