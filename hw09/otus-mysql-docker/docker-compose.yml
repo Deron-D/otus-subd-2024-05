@@ -25,6 +25,7 @@ services:
       - ./custom.conf:/etc/mysql/conf.d
       - /home/dpp/Документы/Otus/otus-subd-2024-05/hw12/users-39289-9e5604.csv:/home/root/users-39289-9e5604.csv
       - /home/dpp/Документы/Otus/otus-subd-2024-05/hw14/AdventureWorks-MySQL-with-FKs.sql:/home/root/AdventureWorks-MySQL-with-FKs.sql
+      - /home/dpp/Документы/Otus/otus-subd-2024-05/hw19/some_customers.csv:/home/root/some_customers.csv
     expose:
       - "3306"
     ports:
